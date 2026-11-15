@@ -1,0 +1,16 @@
+[tasks]
+
+postgres = "docker run --name walletdb -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:18.3-alpine || docker start walletdb"
+
+reset-postgres = "docker rm walletdb"
+
+createdb = "docker exec -it walletdb createdb --username=root --owner=root wtx"
+
+dropdb = "docker exec -it walletdb dropdb wtx"
+
+server = "go run main.go"
+
+[env]
+GOOSE_DRIVER = 'postgres'
+GOOSE_DBSTRING = 'postgres://root:secret@localhost:5432/wtx'
+GOOSE_MIGRATION_DIR = './db/migration'
