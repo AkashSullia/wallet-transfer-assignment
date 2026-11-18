@@ -76,16 +76,22 @@ func (q *Queries) GetTransferByIdempotencyKey(ctx context.Context, idempotencyKe
 const updateTransferStatus = `-- name: UpdateTransferStatus :exec
 UPDATE transfers
 SET status = $1, updated_at = $2
-WHERE id = $3
+WHERE id = $3 AND status = $4
 `
 
 type UpdateTransferStatusParams struct {
 	Status    string    `json:"status"`
 	UpdatedAt time.Time `json:"updated_at"`
 	ID        uuid.UUID `json:"id"`
+	Status_2  string    `json:"status_2"`
 }
 
 func (q *Queries) UpdateTransferStatus(ctx context.Context, arg UpdateTransferStatusParams) error {
-	_, err := q.db.Exec(ctx, updateTransferStatus, arg.Status, arg.UpdatedAt, arg.ID)
+	_, err := q.db.Exec(ctx, updateTransferStatus,
+		arg.Status,
+		arg.UpdatedAt,
+		arg.ID,
+		arg.Status_2,
+	)
 	return err
 }

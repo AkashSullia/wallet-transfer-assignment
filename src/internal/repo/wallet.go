@@ -2,10 +2,11 @@ package repo
 
 import (
 	"context"
+	"time"
 	"uuid"
+	"wallet-transfer-assignment/internal/domain"
 
 	db "wallet-transfer-assignment/db/generated"
-	"wallet-transfer-assignment/internal/domain"
 )
 
 type walletRepository struct {
@@ -14,6 +15,28 @@ type walletRepository struct {
 
 func NewWalletRepository(q *db.SQLStore) domain.WalletRepository {
 	return &walletRepository{q}
+}
+
+func (r *walletRepository) CreateWallet(ctx context.Context, openingBalance int64) (*domain.Wallet, error) {
+	now := time.Now()
+	uuid := uuid.New()
+	q := r.store.QueriesFrom(ctx)
+	w, err := q.CreateWallet(ctx, db.CreateWalletParams{
+		ID:        uuid,
+		Balance:   openingBalance,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+	if err != nil {
+		return nil, err
+	}
+	wallet := &domain.Wallet{
+		ID:        w.ID,
+		Balance:   w.Balance,
+		CreatedAt: w.CreatedAt,
+		UpdatedAt: w.UpdatedAt,
+	}
+	return wallet, nil
 }
 
 func (r *walletRepository) GetWalletBalance(ctx context.Context, walletID uuid.UUID) (*domain.Wallet, error) {

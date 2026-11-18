@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CreateLedgerEntry(ctx context.Context, arg CreateLedgerEntryParams) error
 	CreateTransfer(ctx context.Context, arg CreateTransferParams) (*Transfer, error)
+	CreateWallet(ctx context.Context, arg CreateWalletParams) (*Wallet, error)
 	GetTransferByIdempotencyKey(ctx context.Context, idempotencyKey string) (*Transfer, error)
 	GetWalletBalance(ctx context.Context, id uuid.UUID) (*Wallet, error)
 	GetWalletsForUpdate(ctx context.Context, dollar_1 []uuid.UUID) ([]*Wallet, error)

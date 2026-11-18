@@ -14,20 +14,22 @@ func NewTransferService(
 	w domain.WalletRepository,
 	le domain.LedgerEntryRepository,
 	transactor domain.Transactor,
-) *TransferService {
-	return &TransferService{tr, w, le, transactor}
+) TransferService {
+	return TransferService{tr, w, le, transactor}
 }
 
-// Usecase layer
-func (s *TransferService) Execute(ctx context.Context, req domain.TransferRequest) (transfer *domain.Transfer, err error) {
-	s.transactor.WithinTx(ctx, func(ctx context.Context) error {
+func (s *TransferService) Transfer(ctx context.Context, req domain.TransferReq) (transfer *domain.Transfer, err error) {
+	txErr := s.transactor.WithinTx(ctx, func(ctx context.Context) error {
 		transfer, err = s.doTransfer(ctx, req)
 		return err
 	})
+	if txErr != nil {
+		return nil, txErr
+	}
 	return
 }
 
-func (s *TransferService) doTransfer(ctx context.Context, req domain.TransferRequest) (*domain.Transfer, error) {
+func (s *TransferService) doTransfer(ctx context.Context, req domain.TransferReq) (*domain.Transfer, error) {
 	// 1. Idempotency check
 	existing, err := s.tr.FindTransferByIdempotencyKey(ctx, req.IdempotencyKey)
 	if err == nil {
@@ -48,15 +50,33 @@ func (s *TransferService) doTransfer(ctx context.Context, req domain.TransferReq
 		return nil, err
 	}
 
-	// 3. Validate balance
-	if err := domain.ValidateSufficientFunds(wallets, req); err != nil {
-		return nil, err
-	}
-
-	// 4. Write transfers + ledger entries
+	// 3. Initiate transfer
 	transfer, err := s.tr.Transfer(ctx, req.IdempotencyKey, req.FromWalletID, req.ToWalletID, req.Amount)
 	if err != nil {
 		return nil, err
 	}
-	return s.le.CreateLedgerEntries(ctx, req)
+
+	// 4. Validate balance, mark transfer as failed if check fails and return
+	if err := domain.ValidateSufficientFunds(wallets, req); err != nil {
+		if updErr := s.tr.UpdateTransferStatus(ctx, transfer.ID, "FAILED"); updErr != nil {
+			return nil, err
+		}
+		return transfer, err
+	}
+
+	// 5. Create ledger entries
+	_, err = s.le.CreateLedgerEntries(ctx, transfer)
+	if err != nil {
+		if updErr := s.tr.UpdateTransferStatus(ctx, transfer.ID, "FAILED"); updErr != nil {
+			return nil, err
+		}
+		return transfer, nil
+	}
+
+	// 6. Update final transfer status to succesful
+	err = s.tr.UpdateTransferStatus(ctx, transfer.ID, "PROCESSED")
+	if err != nil {
+		return nil, err
+	}
+	return transfer, nil
 }

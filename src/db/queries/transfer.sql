@@ -5,7 +5,7 @@ VALUES ( $1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
 -- name: UpdateTransferStatus :exec
 UPDATE transfers
 SET status = $1, updated_at = $2
-WHERE id = $3;
+WHERE id = $3 AND status = $4;
 
 -- name: GetTransferByIdempotencyKey :one
 SELECT * FROM transfers WHERE idempotency_key = $1;

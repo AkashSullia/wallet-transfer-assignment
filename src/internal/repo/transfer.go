@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 	"uuid"
+	"wallet-transfer-assignment/internal/domain"
 
 	db "wallet-transfer-assignment/db/generated"
-	"wallet-transfer-assignment/internal/domain"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -79,6 +79,7 @@ func (r *transferRepository) UpdateTransferStatus(ctx context.Context, transferI
 		Status:    status,
 		UpdatedAt: now,
 		ID:        transferID,
+		Status_2:  "PENDING", // avoid duplication
 	})
 	return err
 }

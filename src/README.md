@@ -13,5 +13,6 @@
     and ORM (type-safety)
   - `goose` - database migration
 - Used help of AI (`deepseek`) to:
-  - refine the tasks and get a better understanding on transaction approach for double ledger entries.
+  - refine the tasks assigned
+  - research on various things: such as get a better understanding on transaction approach for double ledger entries.
   - understand how to handle sqlc in the context of clean architecture.

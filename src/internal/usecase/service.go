@@ -10,5 +10,5 @@ type TransferService struct {
 }
 
 type WalletService struct {
-	w domain.WalletRepository
+	W domain.WalletRepository
 }

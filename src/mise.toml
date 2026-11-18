@@ -10,6 +10,8 @@ dropdb = "docker exec -it walletdb dropdb wtx"
 
 server = "go run main.go"
 
+usedb = "docker exec -it walletdb psql -U root wtx"
+
 [env]
 GOOSE_DRIVER = 'postgres'
 GOOSE_DBSTRING = 'postgres://root:secret@localhost:5432/wtx'

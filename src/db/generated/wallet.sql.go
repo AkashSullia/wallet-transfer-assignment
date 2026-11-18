@@ -7,9 +7,38 @@ package db
 
 import (
 	"context"
-
+	"time"
 	"uuid"
 )
+
+const createWallet = `-- name: CreateWallet :one
+INSERT INTO wallets (id, balance, created_at, updated_at)
+VALUES ($1, $2, $3, $4) RETURNING id, balance, created_at, updated_at
+`
+
+type CreateWalletParams struct {
+	ID        uuid.UUID `json:"id"`
+	Balance   int64     `json:"balance"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (*Wallet, error) {
+	row := q.db.QueryRow(ctx, createWallet,
+		arg.ID,
+		arg.Balance,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.Balance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}
 
 const getWalletBalance = `-- name: GetWalletBalance :one
 SELECT id, balance, created_at, updated_at FROM wallets WHERE id = $1

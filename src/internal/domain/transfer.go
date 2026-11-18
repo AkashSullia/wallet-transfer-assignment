@@ -16,7 +16,7 @@ type Transfer struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type TransferRequest struct {
+type TransferReq struct {
 	IdempotencyKey string    `json:"idempotency_key"`
 	FromWalletID   uuid.UUID `json:"from_wallet_id"`
 	ToWalletID     uuid.UUID `json:"to_wallet_id"`

@@ -5,7 +5,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
 	"wallet-transfer-assignment/config"
 	"wallet-transfer-assignment/internal/handlers"
 	"wallet-transfer-assignment/internal/middlewares"

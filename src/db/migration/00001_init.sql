@@ -10,8 +10,6 @@ CREATE TABLE  IF NOT EXISTS transfers (
   updated_at        TIMESTAMPTZ     NOT NULL
 );
 
-CREATE INDEX CONCURRENTLY idempotency_key_transfers ON transfers(idempotency_key);
-
 CREATE TABLE IF NOT EXISTS ledger_entries (
   id                UUID            PRIMARY KEY,
   wallet_id         UUID            NOT NULL,
